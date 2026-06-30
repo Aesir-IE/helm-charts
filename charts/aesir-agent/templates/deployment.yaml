@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aesir-agent.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aesir-agent.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "aesir-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "aesir-agent.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "aesir-agent.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: AESIR_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "aesir-agent.fullname" . }}-token
+                  key: AESIR_TOKEN
+            - name: AESIR_ENDPOINT
+              value: {{ .Values.aesir.endpoint | quote }}
+            - name: AESIR_ENVIRONMENT_ID
+              value: {{ required "aesir.environmentId is required" .Values.aesir.environmentId | quote }}
+            - name: AESIR_POLL_INTERVAL
+              value: {{ .Values.aesir.pollInterval | quote }}
+            {{- with .Values.aesir.instanceId }}
+            - name: AESIR_INSTANCE_ID
+              value: {{ . | quote }}
+            {{- end }}
+            - name: AESIR_OPAMP_ENABLED
+              value: "true"
+            - name: AESIR_OPAMP_PORT
+              value: {{ .Values.opamp.port | quote }}
+            - name: AESIR_OPAMP_ADVERTISE_ADDR
+              value: {{ .Values.opamp.advertiseAddr | default (printf "ws://%s.%s.svc.cluster.local:%v/v1/opamp" (include "aesir-agent.fullname" .) .Release.Namespace .Values.opamp.port) | quote }}
+            {{- if or .Values.metrics.enabled .Values.logs.enabled }}
+            - name: AESIR_AGENT_HOST
+              value: {{ .Values.metrics.agentHost | default (printf "%s.%s.svc.cluster.local" (include "aesir-agent.fullname" .) .Release.Namespace) | quote }}
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: AESIR_METRICS_ENABLED
+              value: "true"
+            - name: AESIR_METRICS_PORT
+              value: {{ .Values.metrics.port | quote }}
+            {{- end }}
+            {{- if .Values.logs.enabled }}
+            - name: AESIR_LOGS_ENABLED
+              value: "true"
+            - name: AESIR_LOGS_PORT
+              value: {{ .Values.logs.port | quote }}
+            {{- end }}
+            - name: AESIR_CAPTURE_ENABLED
+              value: {{ .Values.capture.enabled | quote }}
+            {{- if .Values.capture.enabled }}
+            - name: AESIR_CAPTURE_PORT
+              value: {{ .Values.capture.port | quote }}
+            {{- end }}
+          ports:
+            - name: opamp
+              containerPort: {{ .Values.opamp.port }}
+              protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.logs.enabled }}
+            - name: logs
+              containerPort: {{ .Values.logs.port }}
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.capture.enabled }}
+            - name: capture
+              containerPort: {{ .Values.capture.port }}
+              protocol: TCP
+            {{- end }}
+          readinessProbe:
+            tcpSocket:
+              port: opamp
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+      securityContext:
+        runAsNonRoot: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: 45

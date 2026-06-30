@@ -1,0 +1,57 @@
+name: Lint and Test Charts
+
+on:
+  pull_request:
+    paths:
+      - "charts/**"
+      - "ct.yaml"
+      - ".github/workflows/lint-test.yml"
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --config ct.yaml)
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run chart-testing (lint)
+        if: steps.list-changed.outputs.changed == 'true'
+        run: ct lint --config ct.yaml
+
+      # The agent image is private and the agent needs a live Aesir backend, so a
+      # real in-cluster `ct install` is not viable in public CI. Instead we render
+      # each changed chart with its ci/ values to catch templating errors.
+      - name: Render templates (smoke test)
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          for chart in $(ct list-changed --config ct.yaml); do
+            echo "Rendering $chart"
+            values_args=()
+            for vf in "$chart"/ci/*-values.yaml; do
+              [ -f "$vf" ] && values_args+=( -f "$vf" )
+            done
+            helm template smoke "$chart" "${values_args[@]}" > /dev/null
+          done
