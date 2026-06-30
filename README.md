@@ -1,6 +1,6 @@
 # Aesir Helm Charts
 
-Official Helm charts for the [Aesir](https://aesir.io) platform and products.
+Official Helm charts for the [Aesir](https://aesir.ie) platform and products.
 
 This repository is published as a Helm chart repository via GitHub Pages and is
 the front-facing home for installing Aesir components into your own Kubernetes

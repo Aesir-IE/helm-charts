@@ -1,6 +1,6 @@
 # aesir-agent
 
-The Aesir OTel fleet agent connects to the [Aesir](https://aesir.io) platform,
+The Aesir OTel fleet agent connects to the [Aesir](https://aesir.ie) platform,
 polls for collector configuration, and manages your OpenTelemetry Collectors over
 [OpAMP](https://opentelemetry.io/docs/specs/opamp/). In Kubernetes the agent runs
 an OpAMP server that collectors dial into to receive their managed pipeline config.
@@ -39,7 +39,7 @@ To expose OpAMP outside the cluster, set `service.type` (e.g. `LoadBalancer` or
 | `image.tag` | `""` | Image tag; defaults to the chart `appVersion`. |
 | `image.pullPolicy` | `IfNotPresent` | Image pull policy. |
 | `imagePullSecrets` | `[]` | Registry pull secrets. |
-| `aesir.endpoint` | `https://api.aesir.io` | Aesir platform API endpoint. |
+| `aesir.endpoint` | `https://api.aesir.ie` | Aesir platform API endpoint. |
 | `aesir.token` | `""` | **Required.** API token (stored in a Secret). |
 | `aesir.environmentId` | `""` | **Required.** Environment short ID. |
 | `aesir.pollInterval` | `30s` | Config poll interval. |

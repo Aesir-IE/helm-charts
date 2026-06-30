@@ -4,7 +4,7 @@ description: Aesir OTel fleet agent — connects to the Aesir platform and manag
 type: application
 version: 0.2.1
 appVersion: "0.1.1"
-home: https://aesir.io
+home: https://aesir.ie
 sources:
   - https://github.com/Aesir-IE/helm-charts
 keywords:
@@ -16,4 +16,4 @@ keywords:
   - fleet
 maintainers:
   - name: Aesir
-    url: https://aesir.io
+    url: https://aesir.ie
