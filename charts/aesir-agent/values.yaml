@@ -1,0 +1,63 @@
+image:
+  repository: ghcr.io/frcodinglimited/agent
+  tag: ""              # defaults to Chart.appVersion
+  pullPolicy: IfNotPresent
+
+# Optional registry pull secrets, e.g. [{ name: my-regcred }]
+imagePullSecrets: []
+
+aesir:
+  endpoint: "https://api.aesir.io"
+  token: ""             # required
+  environmentId: ""     # required (short ID, e.g. env_prod_k8s)
+  pollInterval: "30s"
+  instanceId: ""        # optional stable instance ID override (skips disk persistence)
+
+# OpAMP server: collectors connect here to receive their managed config.
+opamp:
+  port: 4320
+  advertiseAddr: ""     # ws:// URL injected into collector configs; defaults to the in-cluster service URL
+
+# OTLP metrics receiver: collectors push their own self-telemetry to the agent.
+metrics:
+  enabled: false
+  port: 4321
+  agentHost: ""         # host:port collectors use to reach this agent; defaults to the in-cluster service DNS
+
+# OTLP logs receiver: ingests collector/agent logs.
+logs:
+  enabled: false
+  port: 4322
+
+# Capture receiver: powers live preview in the pipeline editor.
+capture:
+  enabled: true
+  port: 4323
+
+service:
+  type: ClusterIP
+
+serviceAccount:
+  create: true
+  name: ""
+
+rbac:
+  create: true
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+
+podLabels: {}

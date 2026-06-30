@@ -1,0 +1,24 @@
+aesir-agent has been installed as "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+The agent connects to the Aesir platform at:
+  {{ .Values.aesir.endpoint }}
+for environment:
+  {{ required "aesir.environmentId is required" .Values.aesir.environmentId }}
+
+OpenTelemetry Collectors reach the agent's OpAMP server at:
+  {{ .Values.opamp.advertiseAddr | default (printf "ws://%s.%s.svc.cluster.local:%v/v1/opamp" (include "aesir-agent.fullname" .) .Release.Namespace .Values.opamp.port) }}
+
+Check the agent status:
+  kubectl --namespace {{ .Release.Namespace }} logs -l app.kubernetes.io/instance={{ .Release.Name }} -f
+
+Service ports exposed:
+  - opamp   ({{ .Values.opamp.port }})
+{{- if .Values.metrics.enabled }}
+  - metrics ({{ .Values.metrics.port }})
+{{- end }}
+{{- if .Values.logs.enabled }}
+  - logs    ({{ .Values.logs.port }})
+{{- end }}
+{{- if .Values.capture.enabled }}
+  - capture ({{ .Values.capture.port }})
+{{- end }}

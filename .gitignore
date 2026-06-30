@@ -1,0 +1,13 @@
+# Packaged charts
+*.tgz
+
+# Vendored chart dependencies
+charts/**/charts/
+charts/**/Chart.lock
+
+# chart-releaser working dirs
+.cr-release-packages/
+.cr-index/
+
+# OS / editor cruft
+.DS_Store
