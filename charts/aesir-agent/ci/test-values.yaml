@@ -1,0 +1,6 @@
+# Values used by CI (chart-testing / helm template smoke tests).
+# These are placeholders only — they satisfy the chart's required values so the
+# templates render. They are NOT used for a real deployment.
+aesir:
+  token: "svn_ci_placeholder"
+  environmentId: "env_ci_placeholder"

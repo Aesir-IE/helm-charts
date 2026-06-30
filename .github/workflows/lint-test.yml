@@ -41,10 +41,17 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --config ct.yaml
 
-      - name: Create kind cluster
+      # The agent image is private and the agent needs a live Aesir backend, so a
+      # real in-cluster `ct install` is not viable in public CI. Instead we render
+      # each changed chart with its ci/ values to catch templating errors.
+      - name: Render templates (smoke test)
         if: steps.list-changed.outputs.changed == 'true'
-        uses: helm/kind-action@v1.10.0
-
-      - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --config ct.yaml
+        run: |
+          for chart in $(ct list-changed --config ct.yaml); do
+            echo "Rendering $chart"
+            values_args=()
+            for vf in "$chart"/ci/*-values.yaml; do
+              [ -f "$vf" ] && values_args+=( -f "$vf" )
+            done
+            helm template smoke "$chart" "${values_args[@]}" > /dev/null
+          done
