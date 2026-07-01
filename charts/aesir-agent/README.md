@@ -19,6 +19,23 @@ helm install aesir-agent aesir/aesir-agent \
 
 `aesir.token` and `aesir.environmentId` are required.
 
+## Collector deployment modes
+
+The agent supports two OpAMP collector patterns:
+
+| Pattern | Collector | `opamp.injectExtension` | Platform type |
+| ------- | --------- | ----------------------- | ------------- |
+| **Supervisor** (recommended for K8s) | `opampsupervisor` + `otelcol-contrib` | `false` (default) | `aesir` |
+| **Vanilla** (direct otelcol) | `otelcol-contrib` with bootstrap `opamp` extension | `true` | `vanilla` |
+
+When `opamp.injectExtension` is `true`, the agent injects the `opamp` extension into
+delivered configs so direct collectors reconnect after applying remote config. Leave it
+`false` when using the OpAMP supervisor — injecting the extension breaks supervisor
+health confirmation.
+
+Collector type is registered automatically on first OpAMP connection. Override with the
+OpAMP identifying attribute `aesir.collector.type`, or set `aesir.defaultCollectorType`.
+
 ## How collectors connect
 
 Collectors connect to the agent's OpAMP WebSocket server. By default the chart
@@ -44,8 +61,11 @@ To expose OpAMP outside the cluster, set `service.type` (e.g. `LoadBalancer` or
 | `aesir.environmentId` | `""` | **Required.** Environment short ID. |
 | `aesir.pollInterval` | `30s` | Config poll interval. |
 | `aesir.instanceId` | `""` | Optional stable instance ID override. |
+| `aesir.defaultCollectorType` | `""` | Default collector type when OpAMP inference is unavailable. |
+| `aesir.stateDir` | `/tmp/.aesir` | Writable state directory (mounted via emptyDir at `/tmp`). |
 | `opamp.port` | `4320` | OpAMP WebSocket server port. |
 | `opamp.advertiseAddr` | `""` | OpAMP URL injected into collector configs; defaults to in-cluster Service DNS. |
+| `opamp.injectExtension` | `false` | Inject `opamp` extension into delivered configs (direct/vanilla collectors). |
 | `metrics.enabled` | `false` | Enable the OTLP metrics receiver (collector self-telemetry). |
 | `metrics.port` | `4321` | Metrics receiver port. |
 | `metrics.agentHost` | `""` | Host collectors use to reach the agent; defaults to in-cluster Service DNS. |

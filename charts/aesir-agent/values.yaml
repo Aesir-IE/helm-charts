@@ -12,11 +12,14 @@ aesir:
   environmentId: ""     # required (short ID, e.g. env_prod_k8s)
   pollInterval: "30s"
   instanceId: ""        # optional stable instance ID override (skips disk persistence)
+  defaultCollectorType: ""  # optional; empty = infer from OpAMP (supervisor=aesir, direct=vanilla)
+  stateDir: "/tmp/.aesir"   # writable state directory (read-only root filesystem)
 
 # OpAMP server: collectors connect here to receive their managed config.
 opamp:
   port: 4320
   advertiseAddr: ""     # ws:// URL injected into collector configs; defaults to the in-cluster service URL
+  injectExtension: false  # true for direct otelcol-contrib (vanilla); false for OpAMP supervisor
 
 # OTLP metrics receiver: collectors push their own self-telemetry to the agent.
 metrics:

@@ -47,12 +47,20 @@ spec:
             - name: AESIR_INSTANCE_ID
               value: {{ . | quote }}
             {{- end }}
+            - name: AESIR_STATE_DIR
+              value: {{ .Values.aesir.stateDir | quote }}
+            {{- with .Values.aesir.defaultCollectorType }}
+            - name: AESIR_DEFAULT_COLLECTOR_TYPE
+              value: {{ . | quote }}
+            {{- end }}
             - name: AESIR_OPAMP_ENABLED
               value: "true"
             - name: AESIR_OPAMP_PORT
               value: {{ .Values.opamp.port | quote }}
             - name: AESIR_OPAMP_ADVERTISE_ADDR
               value: {{ .Values.opamp.advertiseAddr | default (printf "ws://%s.%s.svc.cluster.local:%v/v1/opamp" (include "aesir-agent.fullname" .) .Release.Namespace .Values.opamp.port) | quote }}
+            - name: AESIR_OPAMP_INJECT_EXTENSION
+              value: {{ .Values.opamp.injectExtension | quote }}
             {{- if or .Values.metrics.enabled .Values.logs.enabled }}
             - name: AESIR_AGENT_HOST
               value: {{ .Values.metrics.agentHost | default (printf "%s.%s.svc.cluster.local" (include "aesir-agent.fullname" .) .Release.Namespace) | quote }}
@@ -104,6 +112,12 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
       securityContext:
         runAsNonRoot: true
       {{- with .Values.nodeSelector }}
