@@ -20,6 +20,12 @@ opamp:
   port: 4320
   advertiseAddr: ""     # ws:// URL injected into collector configs; defaults to the in-cluster service URL
   injectExtension: false  # true for direct otelcol-contrib (vanilla); false for OpAMP supervisor
+  # k8sApply: write collector config to a ConfigMap and restart the Deployment (vanilla mode).
+  k8sApply:
+    enabled: false
+    configMap: ""
+    configMapKey: config.yaml
+    deployment: ""
 
 # OTLP metrics receiver: collectors push their own self-telemetry to the agent.
 metrics:
