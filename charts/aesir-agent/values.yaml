@@ -7,7 +7,7 @@ image:
 imagePullSecrets: []
 
 aesir:
-  endpoint: "https://api.aesir.io"
+  endpoint: "https://api.aesir.ie"
   token: ""             # required
   environmentId: ""     # required (short ID, e.g. env_prod_k8s)
   pollInterval: "30s"
