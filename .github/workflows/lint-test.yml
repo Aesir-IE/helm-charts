@@ -41,9 +41,9 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --config ct.yaml
 
-      # The agent image is private and the agent needs a live Aesir backend, so a
-      # real in-cluster `ct install` is not viable in public CI. Instead we render
-      # each changed chart with its ci/ values to catch templating errors.
+      # The agent needs a live Aesir backend, so a real in-cluster `ct install`
+      # is not viable in public CI. Instead we render each changed chart with
+      # its ci/ values to catch templating errors.
       - name: Render templates (smoke test)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
