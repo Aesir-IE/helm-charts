@@ -84,6 +84,20 @@ To expose OpAMP outside the cluster, set `service.type` (e.g. `LoadBalancer` or
 | `podAnnotations` | `{}` | Extra pod annotations. |
 | `podLabels` | `{}` | Extra pod labels. |
 
+## Health probes
+
+The agent container exposes TCP health checks on the OpAMP port (`opamp.port`,
+default `4320`). Both probes use `tcpSocket` so the kubelet can detect a hung
+process that still accepts connections.
+
+| Probe | Purpose | `initialDelaySeconds` | `periodSeconds` | `failureThreshold` | `timeoutSeconds` |
+| ----- | ------- | --------------------- | --------------- | ------------------ | ---------------- |
+| `readinessProbe` | Remove the pod from Service endpoints until OpAMP is listening. | 5 | 10 | 3 (default) | 1 (default) |
+| `livenessProbe` | Restart the container when OpAMP stops accepting TCP. | 5 | 10 | 3 | 1 |
+
+With these defaults, kubelet restarts the agent after roughly 30 seconds of
+consecutive liveness failures (3 × `periodSeconds`).
+
 ## RBAC
 
 When `rbac.create` is true the chart creates a ClusterRole granting `get`/`list`
