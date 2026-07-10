@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Aesir docs
+    url: https://aesir.ie/docs
+    about: Installation guides and Helm values reference
+  - name: aesir-agent chart README
+    url: https://github.com/Aesir-IE/helm-charts/tree/main/charts/aesir-agent
+    about: Chart-specific configuration and upgrade notes

@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest a chart improvement or new value
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What deployment scenario isn't covered today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: New values, probes, docs, or chart behavior you'd like.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chart
+    attributes:
+      label: Chart
+      options:
+        - aesir-agent
+        - Other (describe in notes)
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+    validations:
+      required: false

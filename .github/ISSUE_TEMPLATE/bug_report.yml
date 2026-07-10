@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a problem deploying or running the aesir-agent chart
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Include chart and agent versions so we can reproduce.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you expect vs what you saw?
+      placeholder: e.g. Agent pod CrashLoopBackOff after upgrading the chart.
+    validations:
+      required: true
+
+  - type: input
+    id: chart-version
+    attributes:
+      label: Chart version (`Chart.yaml` version)
+      placeholder: e.g. 0.2.5
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Agent image tag (`appVersion` / `image.tag`)
+      placeholder: e.g. 0.1.4
+    validations:
+      required: true
+
+  - type: input
+    id: k8s-version
+    attributes:
+      label: Kubernetes version
+      placeholder: e.g. 1.30.2 (EKS), minikube 1.38
+    validations:
+      required: true
+
+  - type: dropdown
+    id: collector-mode
+    attributes:
+      label: Collector deployment mode
+      options:
+        - OpAMP supervisor (default chart path)
+        - Vanilla collector with extension injection
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: values
+    attributes:
+      label: Relevant Helm values (redact tokens)
+      description: Paste non-secret `values.yaml` overrides or `--set` flags.
+      render: yaml
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Pod logs or events
+      description: `kubectl logs` / `kubectl describe pod` snippets (redact `aesir.token`).
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+    validations:
+      required: false
