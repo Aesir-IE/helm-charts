@@ -117,6 +117,13 @@ spec:
               port: opamp
             initialDelaySeconds: 5
             periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: opamp
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 1
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
