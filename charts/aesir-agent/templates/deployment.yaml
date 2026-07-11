@@ -112,6 +112,12 @@ spec:
               containerPort: {{ .Values.capture.port }}
               protocol: TCP
             {{- end }}
+          startupProbe:
+            tcpSocket:
+              port: opamp
+            periodSeconds: 10
+            failureThreshold: 30
+            timeoutSeconds: 1
           readinessProbe:
             tcpSocket:
               port: opamp

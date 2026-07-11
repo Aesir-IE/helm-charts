@@ -2,7 +2,7 @@ apiVersion: v2
 name: aesir-agent
 description: Aesir OTel fleet agent — connects to the Aesir platform and manages OpenTelemetry Collectors over OpAMP.
 type: application
-version: 0.2.6
+version: 0.2.7
 appVersion: "0.1.4"
 home: https://aesir.ie
 sources:
