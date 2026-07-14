@@ -3,6 +3,30 @@ entries:
   aesir-agent:
   - apiVersion: v2
     appVersion: 0.1.4
+    created: "2026-07-14T22:11:33.482856702Z"
+    description: Aesir OTel fleet agent — connects to the Aesir platform and manages
+      OpenTelemetry Collectors over OpAMP.
+    digest: bc1b3c65cf26ec4fb007c719366e88c707a621f0d4dc4e31feed31e9215d145d
+    home: https://aesir.ie
+    keywords:
+    - aesir
+    - opentelemetry
+    - otel
+    - opamp
+    - observability
+    - fleet
+    maintainers:
+    - name: Aesir
+      url: https://aesir.ie
+    name: aesir-agent
+    sources:
+    - https://github.com/Aesir-IE/helm-charts
+    type: application
+    urls:
+    - https://github.com/Aesir-IE/helm-charts/releases/download/aesir-agent-0.2.8/aesir-agent-0.2.8.tgz
+    version: 0.2.8
+  - apiVersion: v2
+    appVersion: 0.1.4
     created: "2026-07-11T15:27:59.66039571Z"
     description: Aesir OTel fleet agent — connects to the Aesir platform and manages
       OpenTelemetry Collectors over OpAMP.
@@ -193,4 +217,4 @@ entries:
     urls:
     - https://github.com/Aesir-IE/helm-charts/releases/download/aesir-agent-0.2.0/aesir-agent-0.2.0.tgz
     version: 0.2.0
-generated: "2026-07-11T15:27:59.660428471Z"
+generated: "2026-07-14T22:11:33.482894815Z"
