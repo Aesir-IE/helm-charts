@@ -33,6 +33,25 @@ delivered configs so direct collectors reconnect after applying remote config. L
 `false` when using the OpAMP supervisor — injecting the extension breaks supervisor
 health confirmation.
 
+For direct `otelcol-contrib` deployments that cannot accept OpAMP remote config
+in-process, enable `opamp.k8sApply`. The agent writes merged config to the named
+ConfigMap and restarts the collector Deployment. The chart sets `AESIR_AGENT_NAMESPACE`
+to the Helm release namespace, so `configMap` and `deployment` must live in that
+namespace (install the agent into the same namespace as the collector).
+
+See the [earth-102 vanilla overlay](https://github.com/Aesir-IE/earth-102/blob/main/helm/aesir-agent.vanilla.values.yaml)
+for a worked example:
+
+```yaml
+opamp:
+  injectExtension: true
+  k8sApply:
+    enabled: true
+    configMap: otel-collector-config
+    configMapKey: config.yaml
+    deployment: otel-collector
+```
+
 Collector type is registered automatically on first OpAMP connection. Override with the
 OpAMP identifying attribute `aesir.collector.type`, or set `aesir.defaultCollectorType`.
 
@@ -66,6 +85,10 @@ To expose OpAMP outside the cluster, set `service.type` (e.g. `LoadBalancer` or
 | `opamp.port` | `4320` | OpAMP WebSocket server port. |
 | `opamp.advertiseAddr` | `""` | OpAMP URL injected into collector configs; defaults to in-cluster Service DNS. |
 | `opamp.injectExtension` | `false` | Inject `opamp` extension into delivered configs (direct/vanilla collectors). |
+| `opamp.k8sApply.enabled` | `false` | Write collector config to a ConfigMap and restart the target Deployment (vanilla mode). Requires `opamp.injectExtension: true`, plus `configMap` and `deployment`. |
+| `opamp.k8sApply.configMap` | `""` | ConfigMap name to update with merged collector YAML. Must exist in the Helm release namespace. |
+| `opamp.k8sApply.configMapKey` | `config.yaml` | Key within the ConfigMap. |
+| `opamp.k8sApply.deployment` | `""` | Deployment to restart after a config update (rollout via pod template annotation). Must exist in the Helm release namespace. |
 | `metrics.enabled` | `false` | Enable the OTLP metrics receiver (collector self-telemetry). |
 | `metrics.port` | `4321` | Metrics receiver port. |
 | `metrics.agentHost` | `""` | Host collectors use to reach the agent; defaults to in-cluster Service DNS. |
@@ -103,3 +126,15 @@ consecutive liveness failures (3 × `periodSeconds`).
 When `rbac.create` is true the chart creates a ClusterRole granting `get`/`list`
 on `pods`, which the OpAMP server uses to match collector pods against pipeline
 selector labels.
+
+When `opamp.k8sApply.enabled` is true the ClusterRole is expanded with:
+
+| Resource | Verbs | Purpose |
+| -------- | ----- | ------- |
+| `configmaps` | `get`, `update` | Write merged collector YAML to the target ConfigMap |
+| `deployments` (`apps`) | `get`, `update` | Restart the collector Deployment after a config change |
+
+These rules are cluster-scoped (ClusterRole), but the agent only updates the
+ConfigMap and Deployment named in `opamp.k8sApply` within the Helm release
+namespace. Install the agent and collector into the same namespace, or ensure
+the ServiceAccount can reach the target resources in that namespace.
