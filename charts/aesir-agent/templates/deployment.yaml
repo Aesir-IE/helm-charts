@@ -115,21 +115,23 @@ spec:
           startupProbe:
             tcpSocket:
               port: opamp
-            periodSeconds: 10
-            failureThreshold: 30
-            timeoutSeconds: 1
+            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+            timeoutSeconds: {{ .Values.probes.startup.timeoutSeconds }}
           readinessProbe:
             tcpSocket:
               port: opamp
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
           livenessProbe:
             tcpSocket:
               port: opamp
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            failureThreshold: 3
-            timeoutSeconds: 1
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:

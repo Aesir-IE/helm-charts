@@ -106,20 +106,53 @@ To expose OpAMP outside the cluster, set `service.type` (e.g. `LoadBalancer` or
 | `affinity` | `{}` | Pod affinity rules. |
 | `podAnnotations` | `{}` | Extra pod annotations. |
 | `podLabels` | `{}` | Extra pod labels. |
+| `probes.startup.periodSeconds` | `10` | Startup probe interval. |
+| `probes.startup.failureThreshold` | `30` | Startup failures before the container is marked failed (× `periodSeconds` = max startup time). |
+| `probes.startup.timeoutSeconds` | `1` | Startup probe TCP connect timeout. |
+| `probes.readiness.initialDelaySeconds` | `5` | Delay before the first readiness check (after startup succeeds). |
+| `probes.readiness.periodSeconds` | `10` | Readiness probe interval. |
+| `probes.readiness.failureThreshold` | `3` | Readiness failures before the pod is removed from Service endpoints. |
+| `probes.readiness.timeoutSeconds` | `1` | Readiness probe TCP connect timeout. |
+| `probes.liveness.initialDelaySeconds` | `5` | Delay before the first liveness check (after startup succeeds). |
+| `probes.liveness.periodSeconds` | `10` | Liveness probe interval. |
+| `probes.liveness.failureThreshold` | `3` | Liveness failures before the container is restarted. |
+| `probes.liveness.timeoutSeconds` | `1` | Liveness probe TCP connect timeout. |
 
 ## Health probes
 
 The agent container exposes TCP health checks on the OpAMP port (`opamp.port`,
-default `4320`). Both probes use `tcpSocket` so the kubelet can detect a hung
-process that still accepts connections.
+default `4320`). All probes use `tcpSocket` so the kubelet can detect a hung
+process that still accepts connections. The agent has no HTTP `/healthz`
+endpoint.
 
 | Probe | Purpose | `initialDelaySeconds` | `periodSeconds` | `failureThreshold` | `timeoutSeconds` |
 | ----- | ------- | --------------------- | --------------- | ------------------ | ---------------- |
-| `readinessProbe` | Remove the pod from Service endpoints until OpAMP is listening. | 5 | 10 | 3 (default) | 1 (default) |
+| `startupProbe` | Hold liveness/readiness until OpAMP accepts TCP; prevents restart loops on slow cold starts. | — | 10 | 30 | 1 |
+| `readinessProbe` | Remove the pod from Service endpoints until OpAMP is listening. | 5 | 10 | 3 | 1 |
 | `livenessProbe` | Restart the container when OpAMP stops accepting TCP. | 5 | 10 | 3 | 1 |
 
-With these defaults, kubelet restarts the agent after roughly 30 seconds of
-consecutive liveness failures (3 × `periodSeconds`).
+While the startup probe is failing, liveness and readiness checks are disabled.
+Once OpAMP listens, startup succeeds and the pod should become Ready within
+about 60 seconds under normal conditions. With the default liveness settings,
+kubelet restarts the agent after roughly 30 seconds of consecutive liveness
+failures (3 × `periodSeconds`).
+
+### Tuning on resource-constrained nodes
+
+On nodes with limited CPU or memory, image pulls and agent initialization can
+delay the OpAMP listener. If pods restart during rollout before becoming Ready,
+increase the startup grace period:
+
+```yaml
+probes:
+  startup:
+    failureThreshold: 60   # up to 600s (failureThreshold × periodSeconds)
+```
+
+You can also raise `resources.requests` so the scheduler reserves enough CPU
+for a timely cold start. Override any probe field under `probes.startup`,
+`probes.readiness`, or `probes.liveness` in your values file; see
+`values.yaml` for defaults.
 
 ## RBAC
 
