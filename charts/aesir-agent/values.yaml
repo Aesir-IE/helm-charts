@@ -43,6 +43,19 @@ capture:
   enabled: true
   port: 4323
 
+# Default-deny NetworkPolicy limiting agent ingress to intended collector pods.
+networkPolicy:
+  enabled: true
+  collectorIngress:
+    - matchLabels:
+        app.kubernetes.io/name: otel-collector
+
+# Shared-secret auth for OTLP metrics/logs/capture receiver endpoints.
+# Collectors must receive the same AESIR_RECEIVER_SECRET (see chart README).
+receiverAuth:
+  enabled: true
+  secret: ""             # auto-generated on first install when empty
+
 service:
   type: ClusterIP
 
