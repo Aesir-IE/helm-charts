@@ -93,6 +93,13 @@ spec:
             - name: AESIR_CAPTURE_PORT
               value: {{ .Values.capture.port | quote }}
             {{- end }}
+            {{- if .Values.receiverAuth.enabled }}
+            - name: AESIR_RECEIVER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "aesir-agent.fullname" . }}-receiver
+                  key: AESIR_RECEIVER_SECRET
+            {{- end }}
           ports:
             - name: opamp
               containerPort: {{ .Values.opamp.port }}

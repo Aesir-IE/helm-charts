@@ -96,6 +96,10 @@ To expose OpAMP outside the cluster, set `service.type` (e.g. `LoadBalancer` or
 | `logs.port` | `4322` | Logs receiver port. |
 | `capture.enabled` | `true` | Enable the capture receiver for pipeline-editor live preview. |
 | `capture.port` | `4323` | Capture receiver port. |
+| `networkPolicy.enabled` | `true` | Install a default-deny NetworkPolicy allowing ingress only from `networkPolicy.collectorIngress` pods. |
+| `networkPolicy.collectorIngress` | `[{matchLabels: {app.kubernetes.io/name: otel-collector}}]` | Pod selectors allowed to reach OpAMP and OTLP receiver ports. |
+| `receiverAuth.enabled` | `true` | Require `Authorization: Bearer` on OTLP receiver endpoints via `AESIR_RECEIVER_SECRET`. |
+| `receiverAuth.secret` | `""` | Shared receiver secret; auto-generated and persisted in a Secret when empty. |
 | `service.type` | `ClusterIP` | Service type for the agent's ports. |
 | `serviceAccount.create` | `true` | Create a ServiceAccount. |
 | `serviceAccount.name` | `""` | Override the ServiceAccount name. |
@@ -120,6 +124,24 @@ process that still accepts connections.
 
 With these defaults, kubelet restarts the agent after roughly 30 seconds of
 consecutive liveness failures (3 × `periodSeconds`).
+
+## Receiver security
+
+By default the chart installs a **default-deny** `NetworkPolicy` on the agent pod and
+enables shared-secret auth on OTLP receiver endpoints (`metrics`, `logs`, `capture`).
+
+Collectors that push telemetry to the agent must:
+
+1. Match a pod selector listed under `networkPolicy.collectorIngress`.
+2. Receive the same `AESIR_RECEIVER_SECRET` value (exported by the chart Secret
+   `<release>-aesir-agent-receiver` when `receiverAuth.enabled` is true).
+
+The agent injects `Authorization: Bearer ${env:AESIR_RECEIVER_SECRET}` into delivered
+collector configs for self-telemetry and sniffer capture exporters. Mount or export
+`AESIR_RECEIVER_SECRET` on collector pods in the same namespace.
+
+To disable either control (not recommended for multi-tenant clusters), set
+`networkPolicy.enabled: false` and/or `receiverAuth.enabled: false`.
 
 ## RBAC
 
