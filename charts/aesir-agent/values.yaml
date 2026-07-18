@@ -70,3 +70,21 @@ affinity: {}
 podAnnotations: {}
 
 podLabels: {}
+
+# TCP health probes on the OpAMP port. Tune startup thresholds on slow or
+# resource-constrained nodes (see chart README).
+probes:
+  startup:
+    periodSeconds: 10
+    failureThreshold: 30   # up to 300s before startup fails
+    timeoutSeconds: 1
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 1
+  liveness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 1
